@@ -141,7 +141,98 @@ void vEB_print ( vEBoas * node){
     //cout << "cluster " << node->cluster << std::endl;
   }
 }
-
+int successor(vEBoas *root,int val) {
+    int i,j;
+    if(root==NULL || root->u==1)
+        return -1;
+    if(root->u==2)  {
+        if(val==0 && root->maxelement==1)
+            return 1;
+        else
+            return -1;
+    }
+    else if(root->minelement!=INT_MIN && val<root->minelement)  
+        return root->minelement; 
+    else    {
+        i=root->high(val);
+        if(root->summary==NULL) {
+            if(val<root->maxelement)
+                return root->maxelement;
+            else
+                return -1;
+        }
+        
+        else    {
+            if(root->low(val)<findmax(root->cluster[i]))    {
+                j=successor(root->cluster[i],root->low(val));
+                if(j==-1)
+                    return -1;
+            }
+            else    {
+                i=successor(root->summary,i);
+                if(i==-1)   {
+                    if(val<root->maxelement)
+                        return root->maxelement;
+                    else
+                        return -1;
+                }
+                j=findmin(root->cluster[i]);
+                if(j==-1)
+                    return -1;
+            }
+            
+        }
+        
+    }
+    return root->index(i,j);     
+    
+}
+int predecessor(vEBoas *root,int val) {
+    int i,j;
+    if(root==NULL || root->u==1)
+        return -1;
+    if(root->u==2)  {
+        if(val==1 && root->minelement==0)
+            return 0;
+        else
+            return -1;
+    }
+    else if (root->maxelement != -1 && val > root->maxelement) { 
+        return root->maxelement; 
+    } 
+    else    {
+        i=root->high(val);
+        if(root->summary==NULL) {
+            if(val>root->minelement)
+                return root->minelement;
+            else
+                return -1;
+        }
+        
+        else    {
+            if(root->low(val)>findmin(root->cluster[i]))    {
+                j=predecessor(root->cluster[i],root->low(val));
+                if(j==-1)
+                    return -1;
+            }
+            else    {
+                i=predecessor(root->summary,i);
+                if(i==-1 || i==INT_MIN)   {
+                    if(val>root->minelement)
+                        return root->minelement;
+                    else
+                        return -1;
+                }
+                j=findmax(root->cluster[i]);
+                if(j==-1)
+                    return -1;
+            }
+            
+        }
+        
+    }
+    return root->index(i,j);  
+}
 void delete1(vEBoas *root,int val) {
     int i,j;
     if(root==NULL || val<root->minelement || val>root->maxelement)  {        
@@ -195,15 +286,21 @@ int main(){
     // insert(veb, 10, u);
     // insert(veb, 4, u);
     // insert(veb, 6, u);
+    // // cout << successor(veb, 3) << endl;
+    // // cout << successor(veb, 3) << endl;
     // vEB_print(veb);  
     // while(1){
     //     int x;cin >>x;
+    //     cout << "Predecessor ";
+    //     cout << predecessor(veb, x) << endl;
     //     cout << "Present ";
     //     cout << exists(veb, x) <<endl; 
     //     if(x == 1){break;}
     // }    
     //cout << findmax(veb) << endl;
     
+    // cout << "Successor ";
+    // cout << successor(veb, x) << endl;
     while(1){
         int x,y;
         cout << "Enter Choice ";
@@ -223,7 +320,21 @@ int main(){
             cin>>y;
             cout << exists(veb, y) << endl; 
             break;
-
+        case 3://display
+            vEB_print(veb);
+            break;
+        case 4://succ
+            
+            cout << "Enter number whose succ you want to find ";
+            cin>>y;
+            cout<< successor(veb, y) << endl;
+            break;
+        case 5://Prede
+            
+            cout << "Enter number whose prede you want to find ";
+            cin>>y;
+            cout << predecessor(veb, y) <<endl; 
+            break;
         case 6://Delete
            
             cout << "Enter number to delete ";
