@@ -1,8 +1,8 @@
-#include <bits/stdc++.h>
 #include "utilities.h"
 using namespace std;
+typedef pair<int, int> ipair;
 struct vEBoas{
-    int universesize;
+    int u;
     int l, h;
     int minelement;
     int maxelement;   
@@ -28,19 +28,19 @@ int findmax(vEBoas * node){
 }
 vEBoas * createnode(vEBoas *root, int size){
     int s=poweroftwo(size);
-    root->universesize=s;    
+    root->u=s;    
     root->l=lowersqrt(s);
     root->h=highersqrt(s);    
-    root->summary=NULL;        
-    if(root->universesize  > 2){
+    root->summary=NULL;
+    if(root->u <= 2){
+        root->cluster = NULL;
+    }
+    else{
         root->cluster = new vEBoas * [root->h];
         for(int j=0; j<root->h; j++){
             root->cluster[j]=NULL;            
         }
     }
-    else if(root->universesize <= 2){
-        root->cluster = NULL;
-    }    
     root->minelement=INT_MIN;
     root->maxelement=INT_MIN;
     return root;    
@@ -62,24 +62,24 @@ void insert(vEBoas *&root, int key, int u){
     if( key == root->minelement || key == root->maxelement){
         return ;
     }  
-    if(key < 0 || key >= root->universesize){
+    if(key < 0 || key >= root->u){
         cout << "\nKey out of range";
         return;
     }    
-    if(root && root->minelement == INT_MIN){
+    if(root->minelement == INT_MIN){
         emptyinsert(root, key);
         return;
     }    
-    else if(root && root->minelement > key){
+    else if(root->minelement > key){
         swap(key, root->minelement);        
     }
-    if(root && root->maxelement < key){
+    if(root->maxelement < key){
         root->maxelement = key;
     }
-    if(root && root->universesize <=2){
+    if(root->u <=2){
         return;
     }
-    if(root->cluster[high(root, key)]){
+    if(root->cluster[high(root, key)] == NULL){
         insert(root->summary, high(root, key), root->h);
     }
     insert(root->cluster[high(root, key)], low(root, key), root->l);    
@@ -88,7 +88,7 @@ int successor(vEBoas *root,int val) {
     int i,j, ml, offset, sc;
     if(root==NULL)
         return -1;
-    if(root->universesize==2){
+    if(root->u==2){
         if(val==0 && root->maxelement==1)
             return 1;
         else
@@ -116,9 +116,9 @@ int successor(vEBoas *root,int val) {
 }
 int predecessor(vEBoas *root,int val) {
     int i,j, ml, offset, pc;
-    if(!root)
+    if(root==NULL)
         return -1;
-    if(root->universesize==2){
+    if(root->u==2){
         if(val==1 && root->minelement==0)
             return 0;
         else
@@ -150,87 +150,56 @@ int predecessor(vEBoas *root,int val) {
         }        
     }
 }
-void deletenode(vEBoas *& node, int val) {
-    if(!node || val<0 || val>=node->universesize || val<node->minelement || val>node->maxelement){
-        return;
-    }
-    if(node && val == node->minelement) {
-        int i = findmin(node->summary);
-        if(i == -1 || i == INT_MIN) {
-            if(node && node->minelement != node->maxelement) {
-                node->minelement = node->maxelement;
-                return;
-            }
-            node->minelement = node->maxelement = INT_MIN;
-            delete node;
-            node = NULL;
-            return;
-        }
-        val = node->minelement = index(node, i, node->cluster[i]->minelement);
-    }
-    if(node && node->universesize > 2) {        
-        deletenode(node->cluster[high(node, val)], low(node, val));
-        int temp = findmin(node->cluster[high(node, val)]);
-        if(temp == -1 or temp == INT_MIN) {
-            deletenode(node->summary, high(node, val));
-        }
-    }
-    if(node && node->maxelement == val) {
-        int temp = findmax(node->summary);
-        if(temp == -1 or temp == INT_MIN) {
-            node->maxelement = node->minelement;
-        } else {
-            int i = findmax(node->summary);
-            node->maxelement = index(node, i, node->cluster[i]->maxelement);
-        }
-    }
-}
-bool exists(vEBoas *root,int val){
-    if(!root || val <0 || val>=root->universesize){
-        return false;
-    }
-    if(root && root->minelement == val || root->maxelement==val){
-        return true;
-    }
-    else if(root && root->universesize == 2){
-        return false;
-    }
-    else{
-        return exists(root->cluster[high(root, val)], low(root, val));
-    }
-}
 int main(){
-    int u;
-    cout << "Enter size ";
-    cin >> u;     
-    cout << poweroftwo(u) << endl;
-    vEBoas * veb = new vEBoas;
-    createnode(veb, u);
-    //insert
-    for(int j=0; j<16; j++){
-        insert(veb, j, u); 
-        cout << j << " Inserted" << endl;
+    int n, e, i;
+    cout << "Please enter number of nodes " ;
+    cin >> n;
+    cout << "Please enter the number of edges";
+    cin >> e;
+    vector < ipair > graph[n+1];
+    vector < int > dist(n+1, INT_MAX);
+    unordered_map< int, list<int> > umap; 
+    cout << "Please enter " << e << " edges s d w " << endl;
+    for(i=0; i<e; i++){
+        int x, y, z;
+        cin >> x >> y >> z;
+        graph[x].push_back(make_pair(y, z));
+		graph[y].push_back(make_pair(x, z));
     }
-    //exists
-    for(int j=0; j<16; j++){
-        cout << j << " Exists " << exists(veb, j) << endl; 
+    cout << "Enter the source ";
+    int source;
+    cin >> source;
+    dist[source] = 0;
+    umap[0].push_back(source);
+    vEBoas *root = new vEBoas;
+    root = createnode(root, 256);
+    insert(root, 0, 16);
+    int succ=0;
+    do{
+        while(true){
+			if(!umap[succ].empty()){
+				int u = umap[succ].front();
+				umap[succ].pop_front();
+				for(i=0; i<graph[u].size(); i++){
+					ipair p = graph[u][i];
+					int v = p.first;
+					int w = p.second;
+					if(dist[v] > (dist[u] + w)){
+						dist[v] = dist[u] + w;
+						insert(root, dist[v], 16);
+						umap[dist[v]].push_back(v);
+					}
+				}
+			}
+			else{
+				break;
+			}
+        }
+        succ = successor(root, succ);
+    }while(succ != -1);
+    cout << "Result " << endl;
+    for(i=0; i<n; i++){
+        cout << i << " " << dist[i] << endl;
     }
-    //successor
-    for(int j=0; j<16; j++){
-        cout << "Successor of "<< j << " is " << successor(veb, j) << endl;
-    }    
-    //predecessor
-    for(int j=0; j<16; j++){
-        cout << "Predecessor of "<< j << " is " << predecessor(veb, j) << endl;
-    }    
-    //delete
-    for(int j=0; j<16; j++){
-        deletenode(veb, j);
-        cout << "Deleted "<< j <<  endl;
-    }
-    //exists
-    for(int j=0; j<16; j++){
-        cout << j << " Exists " << exists(veb, j) << endl; 
-    }  
-return 0;
+    return 0;
 }
