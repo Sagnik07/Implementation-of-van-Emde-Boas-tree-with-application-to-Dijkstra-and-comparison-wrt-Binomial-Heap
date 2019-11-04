@@ -1,14 +1,4 @@
 #include <bits/stdc++.h>
-// int poweroftwo(int val){
-//     if(val<0)return 0;
-//     --val;
-//     val |= val>>1;
-//     val |= val>>2;
-//     val |= val>>4;
-//     val |= val>>8;
-//     val |= val>>16;
-//     return (val + 1);
-// }
 int poweroftwo(int val){
     int res=1;
     if(val && !(val&(val-1))){

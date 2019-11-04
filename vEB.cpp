@@ -54,35 +54,35 @@ void swap(int &a, int &b){
     a=b;
     b=temp;
 }
-void insert(vEBoas *&root, int key, int u){    
-    if(!root){        
-        root = new vEBoas;
-        root = createnode(root, u);
+void insert(vEBoas *&node, int val, int u){    
+    if(!node){        
+        node = new vEBoas;
+        node = createnode(node, u);
     }  
-    if( key == root->minelement || key == root->maxelement){
+    if( val == node->minelement || val == node->maxelement){
         return ;
     }  
-    if(key < 0 || key >= root->universesize){
+    if(val < 0 || val >= node->universesize){
         cout << "\nKey out of range";
         return;
     }    
-    if(root && root->minelement == INT_MIN){
-        emptyinsert(root, key);
+    if(node && node->minelement == INT_MIN){
+        emptyinsert(node, val);
         return;
     }    
-    else if(root && root->minelement > key){
-        swap(key, root->minelement);        
+    else if(node && node->minelement > val){
+        swap(val, node->minelement);        
     }
-    if(root && root->maxelement < key){
-        root->maxelement = key;
+    if(node && node->maxelement < val){
+        node->maxelement = val;
     }
-    if(root && root->universesize <=2){
+    if(node && node->universesize <=2){
         return;
     }
-    if(root->cluster[high(root, key)]){
-        insert(root->summary, high(root, key), root->h);
+    if(node->cluster[high(node, val)]){
+        insert(node->summary, high(node, val), node->h);
     }
-    insert(root->cluster[high(root, key)], low(root, key), root->l);    
+    insert(node->cluster[high(node, val)], low(node, val), node->l);    
 }
 int successor(vEBoas *root,int val) {
     int i,j, ml, offset, sc;

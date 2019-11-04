@@ -25,6 +25,7 @@ int main(){
     umap[0].push_back(source);
     BinomialHeap bh;
     list<node*> bheap; 
+    const clock_t begin_time2 = clock();
     bh.bino_heap=bheap;
     int succ;
     bheap = bh.insert(bheap,source);     
@@ -47,6 +48,7 @@ int main(){
 			}        
          bheap = bh.extractmin(bheap);
     }
+    cout << (double( clock () - begin_time2 ) *1000/CLOCKS_PER_SEC ) <<endl;
     cout << "Result " << endl;
     for(i=0; i<n; i++){
         cout << i << " " << dist[i] << endl;
